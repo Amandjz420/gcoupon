@@ -1,3 +1,6 @@
 .idea
 .DS_Store
 *.pyc
+celerybeat-schedule.db
+celerybeat.pid
+
