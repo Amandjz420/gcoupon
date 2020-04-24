@@ -64,6 +64,7 @@ class Coupon(models.Model):
     merchant = models.ForeignKey(Merchant, blank=True, null=True, on_delete=models.SET_NULL)
     category = models.ManyToManyField(Category, blank=True, null=True)
     type = models.ManyToManyField(Type, blank=True, null=True)
+    published = models.BooleanField(default=False)
     restriction = models.CharField(max_length=200, blank=True, null=True)
     image = models.CharField(max_length=200, blank=True, null=True)
     code = models.CharField(max_length=100, blank=True, null=True)

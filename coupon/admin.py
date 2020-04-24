@@ -14,14 +14,15 @@ class CouponAdmin(admin.ModelAdmin):
     list_display = [f.name for f in Coupon._meta.fields]
     fields = (
         'coupon_number', 'original_coupon_name', 'revised_coupon_name',
-        'merchant', 'category', 'network', 'type', 'rating',
-        'start_date', 'end_date', 'description', 'desc_updated', 'modified'
+        'merchant', 'status', 'published', 'category', 'network', 'type',
+        'start_date', 'end_date', 'description', 'desc_updated', 'modified',
+        'rating',
     )
     readonly_fields = [
         'original_coupon_name', 'coupon_number', 'status',
         'start_date', 'end_date', 'rating', 'link',
         'category', 'type', 'restriction', 'network', 'merchant',
-        'desc_updated', 'code', 'image', 'modified'
+        'desc_updated', 'code', 'image', 'modified', 'published'
     ]
 
     def get_form(self, request, obj=None, **kwargs):
@@ -34,6 +35,7 @@ class CouponAdmin(admin.ModelAdmin):
         if datetime.now(obj.modified.tzinfo) >= obj.modified + timedelta(minutes=15) \
             or not obj.desc_updated or request.user.id == obj.desc_updated.id:
             obj.desc_updated = request.user
+            obj.published = True
             super().save_model(request, obj, form, change)
         else:
             messages.add_message(
