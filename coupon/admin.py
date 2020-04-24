@@ -15,13 +15,13 @@ class CouponAdmin(admin.ModelAdmin):
     fields = (
         'coupon_number', 'original_coupon_name', 'revised_coupon_name',
         'merchant', 'category', 'network', 'type', 'rating',
-        'start_date', 'end_date', 'description',
+        'start_date', 'end_date', 'description', 'desc_updated', 'modified'
     )
     readonly_fields = [
         'original_coupon_name', 'coupon_number', 'status',
         'start_date', 'end_date', 'rating', 'link',
         'category', 'type', 'restriction', 'network', 'merchant',
-        'desc_updated', 'code', 'image'
+        'desc_updated', 'code', 'image', 'modified'
     ]
 
     def get_form(self, request, obj=None, **kwargs):
@@ -44,7 +44,7 @@ class CouponAdmin(admin.ModelAdmin):
     def response_change(self, request, obj, post_url_continue=None):
         """This makes the response go to the newly created model's change page
         without using reverse"""
-        if datetime.now( obj.modified.tzinfo) >= obj.modified + timedelta(minutes=15)\
+        if datetime.now( obj.celery.pymodified.tzinfo) >= obj.modified + timedelta(minutes=15)\
             or not obj.desc_updated or request.user.id == obj.desc_updated.id:
             return super(CouponAdmin, self).response_change(request, obj)
         else:
