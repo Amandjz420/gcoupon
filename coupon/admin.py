@@ -1,17 +1,19 @@
 from django.contrib import admin
 from django.contrib import messages
 from datetime import datetime, timedelta
-from django.forms import ValidationError as FormValidationError
+from django.utils.html import format_html
 from django.http import HttpResponseRedirect
 
 from .models import Coupon, Merchant, Type, Category
 
-# Register your models here.
-
 
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
-    list_display = [f.name for f in Coupon._meta.fields]
+    list_display = ['coupon_number', 'revised_coupon_name', 'status',
+                    'merchant', 'published_entry', 'start_date', 'end_date',
+                    'desc_updated', 'description', 'view_categories',
+
+                    ]
     fields = (
         'coupon_number', 'original_coupon_name', 'revised_coupon_name',
         'merchant', 'status', 'published', 'category', 'network', 'type',
@@ -24,6 +26,15 @@ class CouponAdmin(admin.ModelAdmin):
         'category', 'type', 'restriction', 'network', 'merchant',
         'desc_updated', 'code', 'image', 'modified', 'published'
     ]
+
+    def published_entry(self, obj):
+        if obj.published:
+            return format_html("<div style='background:#4CAF50;color:white;text-align:center;border-radius:3px;padding:1px'>Published</div>", obj.id)
+        return format_html("<a href='/admin/coupon/coupon/{0}' style='background:#447e9b;color: white;padding: 5px;border-radius: 3px;'>Start Writing</a>", obj.id)
+
+
+    def view_categories(self, obj):
+        return list(obj.category.all())
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(CouponAdmin, self).get_form(request, obj, **kwargs)
@@ -46,7 +57,7 @@ class CouponAdmin(admin.ModelAdmin):
     def response_change(self, request, obj, post_url_continue=None):
         """This makes the response go to the newly created model's change page
         without using reverse"""
-        if datetime.now( obj.celery.pymodified.tzinfo) >= obj.modified + timedelta(minutes=15)\
+        if datetime.now(obj.modified.tzinfo) >= obj.modified + timedelta(minutes=15)\
             or not obj.desc_updated or request.user.id == obj.desc_updated.id:
             return super(CouponAdmin, self).response_change(request, obj)
         else:
@@ -54,7 +65,7 @@ class CouponAdmin(admin.ModelAdmin):
 
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
         extra_context = extra_context or {}
-        extra_context['show_save_and_continue'] = False
+        extra_context['show_save_and_continue'] = True
         extra_context['show_save_and_add_another'] = False
         extra_context['show_save'] = True
         return super(CouponAdmin, self).changeform_view(request, object_id, extra_context=extra_context)
@@ -72,6 +83,3 @@ class TypeAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = [f.name for f in Category._meta.fields]
-
-
-# Register your models here.
