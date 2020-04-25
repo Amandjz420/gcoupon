@@ -10,9 +10,8 @@ from .models import Coupon, Merchant, Type, Category
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
     list_display = ['coupon_number', 'revised_coupon_name', 'status',
-                    'merchant', 'published_entry', 'start_date', 'end_date',
-                    'desc_updated', 'description', 'view_categories',
-
+                    'merchant', 'published_entry', 'desc_updated',
+                    'start_date', 'end_date', 'description', 'view_categories',
                     ]
     fields = (
         'coupon_number', 'original_coupon_name', 'revised_coupon_name',
@@ -24,7 +23,7 @@ class CouponAdmin(admin.ModelAdmin):
         'original_coupon_name', 'coupon_number', 'status',
         'start_date', 'end_date', 'rating', 'link',
         'category', 'type', 'restriction', 'network', 'merchant',
-        'desc_updated', 'code', 'image', 'modified', 'published'
+        'desc_updated', 'code', 'image', 'modified',
     ]
 
     def published_entry(self, obj):
@@ -46,7 +45,8 @@ class CouponAdmin(admin.ModelAdmin):
         if datetime.now(obj.modified.tzinfo) >= obj.modified + timedelta(minutes=15) \
             or not obj.desc_updated or request.user.id == obj.desc_updated.id:
             obj.desc_updated = request.user
-            obj.published = True
+            if request.POST['_continue'] is 'Save':
+                obj.published = True
             super().save_model(request, obj, form, change)
         else:
             messages.add_message(
@@ -64,10 +64,9 @@ class CouponAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(request.path_info)
 
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        extra_context = extra_context or {}
-        extra_context['show_save_and_continue'] = True
-        extra_context['show_save_and_add_another'] = False
-        extra_context['show_save'] = True
+        if object_id:
+            extra_context = extra_context or {}
+            extra_context['show_save_and_add_another'] = False
         return super(CouponAdmin, self).changeform_view(request, object_id, extra_context=extra_context)
 
 @admin.register(Merchant)
