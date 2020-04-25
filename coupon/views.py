@@ -25,10 +25,12 @@ class CouponListApi(ListView):
             words = self.request.GET['filter'].replace('_', ' ').split(',')
 
             query_filter = Q(category__name__icontains=words[0])
+            query_filter = query_filter | Q(merchant__name__icontains=words[0])
             query_filter = query_filter | Q(type__name__icontains=words[0])
             query_filter = query_filter | Q(revised_coupon_name__icontains=words[0])
             for word in words[1:]:
                 query_filter = query_filter | Q(category__name__icontains=word)
+                query_filter = query_filter | Q(merchant__name__icontains=word)
                 query_filter = query_filter | Q(type__name__icontains=word)
                 query_filter = query_filter | Q(revised_coupon_name__icontains=word)
 
