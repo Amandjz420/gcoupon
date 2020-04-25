@@ -45,7 +45,7 @@ class CouponAdmin(admin.ModelAdmin):
         if datetime.now(obj.modified.tzinfo) >= obj.modified + timedelta(minutes=15) \
             or not obj.desc_updated or request.user.id == obj.desc_updated.id:
             obj.desc_updated = request.user
-            if request.POST['_continue'] is 'Save':
+            if '_save' in request.POST:
                 obj.published = True
             super().save_model(request, obj, form, change)
         else:
